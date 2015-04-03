@@ -9,6 +9,7 @@
 
 int main(){
 	int serial = open( "/dev/ttyAMA0", O_WRONLY| O_NOCTTY );
+//	int serial = open( "/dev/ttyUSB0", O_WRONLY| O_NOCTTY );
 
 	struct termios tty;
 	struct termios tty_old;
@@ -62,8 +63,12 @@ int main(){
 	} while (cmd[spot-1] != '\r' && n_written > 0);
 	//*/
 
+	std::cout << "serial = " << serial << std::endl;
 	int n_written = write( serial, cmd, sizeof(cmd));
 	std::cout << "Write " << n_written << std::endl;
-	
+	if(n_written<0){
+		std::cout << "Error " << errno << ": " << strerror(errno) << std::endl;
+	}
+
 	return 0;
 }

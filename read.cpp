@@ -9,6 +9,7 @@
 
 int main(){
 	int serial = open( "/dev/ttyAMA0", O_RDONLY| O_NOCTTY );
+//	int serial = open( "/dev/ttyUSB0", O_RDONLY| O_NOCTTY );
 
 	struct termios tty;
 	struct termios tty_old;

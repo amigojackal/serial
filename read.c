@@ -69,7 +69,7 @@ void main(){
 	/* Print what I read... */
 			printf("n=%d\n",n);
 			for(i=0;i<n;i++){
-				printf("%d ",buf[0]);
+				printf("%d ",buf[i]);
 			}
 			printf("\n");
 		}

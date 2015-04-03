@@ -15,7 +15,7 @@ void main(){
 	}else{
 		printf("ttyAMA0 opened!(%d)\n", fd);
 	}
-	
+
 	memset(&tty,0,sizeof(tty));
 	
 	if(tcgetattr(fd, &tty) != 0){
@@ -23,11 +23,11 @@ void main(){
 		return;
 	}
 	
-	/* Set Baud Rate */
+	// Set Baud Rate 
 	cfsetospeed (&tty, B9600);
 	cfsetispeed (&tty, B9600);
 
-	/* Setting other Port Stuff */
+	// Setting other Port Stuff
 	tty.c_cflag     &=  ~PARENB;        // Make 8n1
 	tty.c_cflag     &=  ~CSTOPB;
 	tty.c_cflag     &=  ~CSIZE;
@@ -43,7 +43,7 @@ void main(){
 	tty.c_lflag     &=  ~(ICANON | ECHO | ECHOE | ISIG); // make raw
 	tty.c_oflag     &=  ~OPOST;              // make raw
 
-	/* Flush Port, then applies attributes */
+	// Flush Port, then applies attributes
 	tcflush( fd, TCIFLUSH );
 	if ( tcsetattr ( fd, TCSANOW, &tty ) != 0)
 	{
@@ -51,20 +51,17 @@ void main(){
 		return;
 	}
 	
-	unsigned char cmd[16];
-	cmd[0]=0;	cmd[1]=1;	cmd[2]=0;	cmd[3]=3;
-	cmd[4]=0;	cmd[5]=0;	cmd[6]=0;	cmd[7]=1;
-	cmd[8]=0;	cmd[9]=0;	cmd[10]=0;	cmd[11]=1;
-	cmd[12]=0xc;	cmd[13]=0xa;	cmd[14]=0xd;	cmd[15]=0x5;
-	//*/
-//	unsigned char *cmd = "010300010001CAD5";
-	int size = 16;
+	unsigned char cmd[8];
+	cmd[0]=0x01;	cmd[1]=0x03;
+	cmd[2]=0x00;	cmd[3]=0x01;
+	cmd[4]=0x00;	cmd[5]=0x01;
+	cmd[6]=0xd5;	cmd[7]=0xca;
 	
-	int n_written = write( fd, cmd, 16 );
+	int n_written = write( fd, cmd, sizeof cmd);
 	int i;
 	
 	printf("%d sent\n",n_written);
-	for(i=0;i<16;i++){
+	for(i=0;i<sizeof cmd;i++){
 		printf("%d ",cmd[i]);
 	}
 	printf("\n");
