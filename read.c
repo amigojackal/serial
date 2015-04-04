@@ -9,6 +9,7 @@
 void main(){
 	struct termios tty;
 	int fd = open("/dev/ttyAMA0", O_RDONLY);
+//	int fd = open("/dev/ttyUSB0", O_RDONLY);
 	if(fd<0){
 		fprintf(stderr, "Unable to open serial port\n");
 		return;
@@ -34,7 +35,7 @@ void main(){
 	tty.c_cflag     |=  CS8;                // 8 Bits
 	tty.c_cflag     &=  ~CRTSCTS;           // no flow control
 	tty.c_cc[VMIN]   =  1;                  // read doesn't block
-	tty.c_cc[VTIME]  =  5;                  // 0.5 seconds read timeout
+	tty.c_cc[VTIME]  =  10;                  // 0.5 seconds read timeout
 	tty.c_cflag     |=  (CLOCAL | CREAD );    // turn on READ & ignore ctrl lines
 	
 	

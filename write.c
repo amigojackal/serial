@@ -9,6 +9,7 @@
 void main(){
 	struct termios tty;
 	int fd = open("/dev/ttyAMA0", O_WRONLY);
+//	int fd = open("/dev/ttyUSB0", O_WRONLY);
 	if(fd<0){
 		fprintf(stderr, "Unable to open serial port\n");
 		return;
@@ -34,7 +35,7 @@ void main(){
 	tty.c_cflag     |=  CS8;                // 8 Bits
 	tty.c_cflag     &=  ~CRTSCTS;           // no flow control
 	tty.c_cc[VMIN]   =  1;                  // read doesn't block
-	tty.c_cc[VTIME]  =  5;                  // 0.5 seconds read timeout
+	tty.c_cc[VTIME]  =  10;                  // 0.5 seconds read timeout
 	tty.c_cflag     |=  (CLOCAL | CREAD );    // turn on READ & ignore ctrl lines
 
 	// Make raw 
@@ -75,8 +76,13 @@ void main(){
 	cmd[4]=0x00;	cmd[5]=0x01;
 	cmd[6]=0x60;	cmd[7]=0x0A;*/
 	
-	int n_written = write( fd, cmd, sizeof cmd);
-	int i;
+	int n_written = 0;
+	int i,j=1000000;
+	for(i=0;i<sizeof cmd;i++){
+		n_written += write( fd, &cmd[i], 1);
+		while(j>0)j--;
+		j=1000000;
+	}
 	
 	printf("%d sent\n",n_written);
 	for(i=0;i<sizeof cmd;i++){
