@@ -8,7 +8,7 @@
 
 void main(){
 	struct termios tty;
-	int fd = open("/dev/ttyAMA0", O_RDWR);
+	int fd = open("/dev/ttyAMA0", O_WRONLY);
 	if(fd<0){
 		fprintf(stderr, "Unable to open serial port\n");
 		return;
@@ -27,7 +27,21 @@ void main(){
 	cfsetospeed (&tty, B9600);
 	cfsetispeed (&tty, B9600);
 
+	// 8 Bits, No Parity and 1 Stop bit settings
+	tty.c_cflag     &=  ~PARENB;            // No Parity
+	tty.c_cflag     &=  ~CSTOPB;            // 1 Stop Bit
+	tty.c_cflag     &=  ~CSIZE;
+	tty.c_cflag     |=  CS8;                // 8 Bits
+	tty.c_cflag     &=  ~CRTSCTS;           // no flow control
+	tty.c_cc[VMIN]   =  1;                  // read doesn't block
+	tty.c_cc[VTIME]  =  5;                  // 0.5 seconds read timeout
+	tty.c_cflag     |=  (CLOCAL | CREAD );    // turn on READ & ignore ctrl lines
+
+	// Make raw 
+	cfmakeraw(&tty);
+
 	// Setting other Port Stuff
+	/*
 	tty.c_cflag     &=  ~PARENB;        // Make 8n1
 	tty.c_cflag     &=  ~CSTOPB;
 	tty.c_cflag     &=  ~CSIZE;
@@ -42,7 +56,7 @@ void main(){
 	tty.c_iflag     &=  ~(IXON | IXOFF | IXANY);// turn off s/w flow ctrl
 	tty.c_lflag     &=  ~(ICANON | ECHO | ECHOE | ISIG); // make raw
 	tty.c_oflag     &=  ~OPOST;              // make raw
-
+//*/
 	// Flush Port, then applies attributes
 	tcflush( fd, TCIFLUSH );
 	if ( tcsetattr ( fd, TCSANOW, &tty ) != 0)
@@ -55,7 +69,11 @@ void main(){
 	cmd[0]=0x01;	cmd[1]=0x03;
 	cmd[2]=0x00;	cmd[3]=0x01;
 	cmd[4]=0x00;	cmd[5]=0x01;
-	cmd[6]=0xd5;	cmd[7]=0xca;
+	cmd[6]=0xD5;	cmd[7]=0xCA;
+/*	cmd[0]=0x01;	cmd[1]=0x04;
+	cmd[2]=0x00;	cmd[3]=0x01;
+	cmd[4]=0x00;	cmd[5]=0x01;
+	cmd[6]=0x60;	cmd[7]=0x0A;*/
 	
 	int n_written = write( fd, cmd, sizeof cmd);
 	int i;
