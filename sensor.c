@@ -67,6 +67,7 @@ void go(){
 	unsigned char addr;
 	char buf [16];
 	
+/*
 	cmd[0]=0x01;
 	cmd[1]=0x03;
 	cmd[2]=0x00;
@@ -88,13 +89,13 @@ void go(){
 		fflush(stdout); 
 
 		n = read( fd, &buf , sizeof buf );
-	/* Error Handling */
+	// Error Handling 
 		if(n<0){
 			printf("Error reading: (%d) %s\n",errno,strerror(errno));
 			break;
 		}
 		if(n>0){
-	/* Print what I read... */
+	// Print what I read... 
 			printf("%d read << ",n);
 			for(i=0;i<n;i++){
 				printf("%d ",buf[i]);
@@ -103,8 +104,12 @@ void go(){
 			parser(3, addr, buf, n);
 		}
 	}
-	
+*/
+	cmd[0]=0x01;
 	cmd[1]=0x04;
+	cmd[2]=0x00;
+	cmd[4]=0x00;
+	cmd[5]=0x01;
 	for(addr = 0; addr < 3 ; addr += 1){
 		cmd[3]=addr;
 		crc = CalculateCRC(cmd,6);

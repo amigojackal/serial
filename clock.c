@@ -25,8 +25,8 @@ void go(){
 	}
 	
 	// Set Baud Rate 
-	cfsetospeed (&tty, B4800);
-	cfsetispeed (&tty, B4800);
+	cfsetospeed (&tty, B38400);
+	cfsetispeed (&tty, B38400);
 
 	// 8 Bits, No Parity and 1 Stop bit settings
 	tty.c_cflag     &=  ~PARENB;            // No Parity
@@ -35,7 +35,7 @@ void go(){
 	tty.c_cflag     |=  CS8;                // 8 Bits
 	tty.c_cflag     &=  ~CRTSCTS;           // no flow control
 	tty.c_cc[VMIN]   =  1;                  // read doesn't block
-	tty.c_cc[VTIME]  =  10;                  // 0.5 seconds read timeout
+	tty.c_cc[VTIME]  =  5;                  // 0.5 seconds read timeout
 	tty.c_cflag     |=  (CLOCAL | CREAD );    // turn on READ & ignore ctrl lines
 
 	// Make raw 
@@ -56,33 +56,16 @@ void go(){
 	unsigned char addr;
 	char buf [16];
 	
-	n_written = write( fd, cmd, sizeof cmd);
+	n_written = write( fd, cmd, 14);
 	printf("%d sent >> ",n_written);
-	for(i=0;i<sizeof cmd;i++){
-		printf("%d ",cmd[i]);
+	for(i=0;i<14;i++){
+		printf("%c",cmd[i]);
 	}
 	printf("\n");
 	fflush(stdout); 
 
 	close(fd);
 }
-
-int CalculateCRC(unsigned char *cmd, int length)
-{
-	int x, y, SLSB;
-	int CRC=65535; //0FFFFH
-	for(x=0; x<length; x++){
-		CRC=CRC ^ cmd[x];
-		for(y=0; y<=7; y++){
-			if( (CRC & 1)==1 ) SLSB=1;
-			else SLSB=0;
-			CRC=CRC >> 1;
-			if( SLSB==1 ) CRC=CRC ^ 40961; //0A001H
-		}
-	}
-	return CRC;
-}
-
 
 void main(){
 	int i=0;
