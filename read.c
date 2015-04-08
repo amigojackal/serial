@@ -8,7 +8,7 @@
 
 void go(){
 	struct termios tty;
-	int fd = open("/dev/ttyAMA0", O_RDWR);
+	int fd = open("/dev/ttyAMA0", O_RDONLY);
 
 	if(fd<0){
 		fprintf(stderr, "Unable to open serial port\n");
@@ -25,8 +25,8 @@ void go(){
 	}
 	
 	// Set Baud Rate 
-	cfsetospeed (&tty, B4800);
-	cfsetispeed (&tty, B4800);
+	cfsetospeed (&tty, B9600);
+	cfsetispeed (&tty, B9600);
 
 	// 8 Bits, No Parity and 1 Stop bit settings
 	tty.c_cflag     &=  ~PARENB;            // No Parity
@@ -56,13 +56,22 @@ void go(){
 	unsigned char addr;
 	char buf [16];
 	
-	n_written = write( fd, cmd, sizeof cmd);
-	printf("%d sent >> ",n_written);
-	for(i=0;i<sizeof cmd;i++){
-		printf("%d ",cmd[i]);
+	while(1){
+		n = read( fd, &buf , sizeof buf );
+		/* Error Handling */
+		if(n<0){
+			printf("Error reading: (%d) %s\n",errno,strerror(errno));
+			break;
+		}
+		if(n>0){
+		/* Print what I read... */
+			printf("%d read << ",n);
+			for(i=0;i<n;i++){
+				printf("%d ",buf[i]);
+			}
+			printf("\n");
+		}
 	}
-	printf("\n");
-	fflush(stdout); 
 
 	close(fd);
 }
@@ -89,9 +98,9 @@ void main(){
 	int delay = 0;
 	srand(time(NULL));
 	go();
-	while(0){
+/*	while(0){
 		go();
 		i = delay;
 		while(i>0) i--;
-	}
+	}*/
 }

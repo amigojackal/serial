@@ -19,9 +19,9 @@ void parser(int type, unsigned char addr, unsigned char *data, int len){
 		error = 2;
 	}
 	if(error){
-		int delay = 10000000 + rand()%10000000;
+/*		int delay = 10000000 + rand()%10000000;
 		sleep(1);
-		while(delay > 0) delay -= 1;
+		while(delay > 0) delay -= 1;*/
 		return;
 	}
 	/*
