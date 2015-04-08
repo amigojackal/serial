@@ -7,14 +7,50 @@
 #include <errno.h>
 
 void parser(int type, unsigned char addr, unsigned char *data, int len){
+	int error = 0;
+	int value;
+	char str[500];
+	if(len != 7){
+		printf("ERROR reading length!!\n");
+		error = 1;
+	}
 	if(CalculateCRC(data,len-2) != data[len-2] + data[len-1]*256){
 		printf("ERROR checking CRC!!\n");
+		error = 2;
+	}
+	if(error){
 		int delay = 10000000 + rand()%10000000;
 		sleep(1);
 		while(delay > 0) delay -= 1;
 		return;
 	}
+	/*
+
+	Note that rrd file has been generate by root in /var/rrd/ by the following scripts
 	
+	rrdtool create /var/rrd/co2.rrd --step 60 --no-overwrite DS:co2:GAUGE:5:U:U RRA:AVERAGE:0.5:1:1054080
+	rrdtool create /var/rrd/temp.rrd --step 60 --no-overwrite DS:temp:GAUGE:5:U:U RRA:AVERAGE:0.5:1:1054080
+	rrdtool create /var/rrd/humidity.rrd --step 60 --no-overwrite DS:humidity:GAUGE:5:U:U RRA:AVERAGE:0.5:1:1054080
+
+	*/
+	if(type == 4){
+		value = data[3]*256+data[4];
+		if(addr == 0){ // CO2
+			printf("CO2 = %d\n",value);
+			sprintf(str,"rrdtool update /var/rrd/co2.rrd N:%d",value);
+			system(str);
+		}
+		if(addr == 1){ // Temperature
+			printf("Temp = %.1f\n",value/10.0);
+			sprintf(str,"rrdtool update /var/rrd/temp.rrd N:%.1f",value/10.0);
+			system(str);
+		}
+		if(addr == 2){ // Humidity
+			printf("Humidity = %.1f\n",value/10.0);
+			sprintf(str,"rrdtool update /var/rrd/humidity.rrd N:%.1f",value/10.0);
+			system(str);
+		}
+	}
 }
 
 void go(){
@@ -67,7 +103,7 @@ void go(){
 	unsigned char addr;
 	char buf [16];
 	
-/*
+/* Modbus 40000 - 40009 (No use for now)
 	cmd[0]=0x01;
 	cmd[1]=0x03;
 	cmd[2]=0x00;
@@ -163,13 +199,12 @@ int CalculateCRC(unsigned char *cmd, int length)
 
 
 void main(){
-	int i=0;
-	int delay = 0;
+	int count = 26;
 	srand(time(NULL));
-	go();
-	while(0){
+	while(count){
+		system("date");
 		go();
-		i = delay;
-		while(i>0) i--;
+		sleep(2);
+		count -= 1;
 	}
 }
