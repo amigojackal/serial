@@ -5,6 +5,7 @@
 #include <fcntl.h> // defines O_RDWR|O_NONBLOCK|O_NDELAY
 #include <termios.h>
 #include <errno.h>
+#include <time.h>
 
 void parser(int type, unsigned char addr, unsigned char *data, int len){
 	int error = 0;
@@ -39,15 +40,21 @@ void parser(int type, unsigned char addr, unsigned char *data, int len){
 			printf("CO2 = %d\n",value);
 			sprintf(str,"rrdtool update /var/rrd/co2.rrd N:%d",value);
 			system(str);
+			sprintf(str,"echo %d > /var/www/data/co2",value);
+			system(str);
 		}
 		if(addr == 1){ // Temperature
 			printf("Temp = %.1f\n",value/10.0);
 			sprintf(str,"rrdtool update /var/rrd/temp.rrd N:%.1f",value/10.0);
 			system(str);
+			sprintf(str,"echo %d > /var/www/data/temp",value);
+			system(str);
 		}
 		if(addr == 2){ // Humidity
 			printf("Humidity = %.1f\n",value/10.0);
 			sprintf(str,"rrdtool update /var/rrd/humidity.rrd N:%.1f",value/10.0);
+			system(str);
+			sprintf(str,"echo %d > /var/www/data/humid",value);
 			system(str);
 		}
 	}
@@ -199,12 +206,21 @@ int CalculateCRC(unsigned char *cmd, int length)
 
 
 void main(){
-	int count = 26;
+	int count = 25;
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+	int hour = tm.tm_hour;
+
 	srand(time(NULL));
 	while(count){
 		system("date");
 		go();
 		sleep(2);
-		count -= 1;
+		//count -= 1;
+		t = time(NULL);
+		tm = *localtime(&t);
+	
+		if(tm.tm_hour != hour && (tm.tm_min > 10 || tm.tm_min == 10 && tm.tm_sec > 55)) break;
+
 	}
 }
